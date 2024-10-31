@@ -4,12 +4,21 @@ import { SetMine } from "./jsCreate/CreateSetMine.js";
 import { SetBatiment } from "./jsCreate/CreateSetBatiment.js";
 import { SetUICamera } from "./jsCreate/CreateSetUICamera.js";
 
+import { Data } from "./data.js";
+
+//import pour le menu fusion
+import { MenuFusion } from "./menu/fusion/MenuFusion.js";
+import { MenuFusionCercle } from "./menu/fusion/MenuFusionCercle.js";
+import { MenuFusionListeMateriel } from "./menu/fusion/MenuFusionListeminerais.js";
+
 export default class MainScene extends Phaser.Scene {
     constructor() {
         super({ key: 'MainScene' });
     }
 
     create() {
+        //set la data
+        Data(this);
         //set la camera principal
         SetCamera(this);
 
@@ -17,6 +26,9 @@ export default class MainScene extends Phaser.Scene {
         this.isMouseDown = false;
         this.mouseStartX = 0;
         this.mouseStartY = 0;
+
+        //variable utile
+        this.menu = "home";
 
         //afficher les ile
         SetIle(this);
@@ -30,6 +42,12 @@ export default class MainScene extends Phaser.Scene {
         //afficher les ressource
         SetUICamera(this);
 
+        //a sup
+
+        // Détecter le défilement de la souris dans la zone de liste
+
+        //a sup
+
         this.input.on('pointerdown', (pointer) => {
             if (pointer.leftButtonDown()) {
                 this.isMouseDown = true;
@@ -42,65 +60,70 @@ export default class MainScene extends Phaser.Scene {
             this.isMouseDown = false;
         });
 
+        //paramètre de zoom
         this.zoomFactor = 1;
         this.maxZoom = 10;
         this.minZoom = 0.1;
 
         this.input.on('wheel', (pointer, gameObjects, deltaX, deltaY) => {
-            const cameraX = this.cameras.main.scrollX + pointer.x;
-            const cameraY = this.cameras.main.scrollY + pointer.y;
+            if (this.menu === "home") {
+                const cameraX = this.cameras.main.scrollX + pointer.x;
+                const cameraY = this.cameras.main.scrollY + pointer.y;
 
-            const centerX = this.cameras.main.scrollX + this.cameras.main.width / 2;
-            const centerY = this.cameras.main.scrollY + this.cameras.main.height / 2;
+                const centerX = this.cameras.main.scrollX + this.cameras.main.width / 2;
+                const centerY = this.cameras.main.scrollY + this.cameras.main.height / 2;
 
-            if (deltaY < 0) {
-                this.zoomFactor += 0.1 * this.zoomFactor;
-            } else {
-                this.zoomFactor -= 0.1 * this.zoomFactor;
+                if (deltaY < 0) {
+                    this.zoomFactor += 0.1 * this.zoomFactor;
+                } else {
+                    this.zoomFactor -= 0.1 * this.zoomFactor;
+                }
+
+                this.zoomFactor = Phaser.Math.Clamp(this.zoomFactor, this.minZoom, this.maxZoom);
+                this.cameras.main.setZoom(this.zoomFactor);
             }
-
-            this.zoomFactor = Phaser.Math.Clamp(this.zoomFactor, this.minZoom, this.maxZoom);
-            this.cameras.main.setZoom(this.zoomFactor);
         });
     }
 
     createMenu() {
         // Créer un conteneur pour le menu
-        const menuFusionContainer = this.add.container(200, 200).setDepth(10); // Définit une profondeur pour que le menu soit au-dessus des autres éléments
+        this.menuFusionContainer = this.add.container(0, 0).setDepth(10); // Définit une profondeur pour que le menu soit au-dessus des autres éléments
 
-        // Ajouter un fond au menu
-        const menuBackground = this.add.graphics();
-        menuBackground.fillStyle(0x000000, 0.8); // Couleur noire avec opacité
-        menuBackground.fillRect(-200, -200, window.innerWidth, window.innerHeight); // Taille du menu
-        menuFusionContainer.add(menuBackground);
-
-        // Ajouter du texte au menu
-        const menuText = this.add.text(20, 20, 'Menu de Fusion', { fontSize: '32px', fill: '#fff' });
-        menuFusionContainer.add(menuText);
-
-        //croix fermer
-        const boutonCroix = this.add.image(350, 50, "boutonCroix").setOrigin(0.5, 0.5).setInteractive();
-        boutonCroix.displayWidth = 70;
-        boutonCroix.displayHeight = 70;
-        boutonCroix.on('pointerdown', () => {
-            menuFusionContainer.destroy(); // Détruire le menu quand on clique sur "Fermer"
-        });
-        menuFusionContainer.add(boutonCroix);
+        MenuFusion(this);
+        MenuFusionListeMateriel(this);
+        MenuFusionCercle(this);
 
         //iniore les autre menu
-        this.cameras.main.ignore(menuFusionContainer);
+        this.cameras.main.ignore(this.menuFusionContainer);
     }
 
     update() {
-        if (this.isMouseDown) {
-            const deltaX = this.input.x - this.mouseStartX;
-            const deltaY = this.input.y - this.mouseStartY;
+        //verifer que est sur la map
+        if (this.menu === "home") {
+            if (this.isMouseDown) {
+                const deltaX = this.input.x - this.mouseStartX;
+                const deltaY = this.input.y - this.mouseStartY;
 
-            this.cameras.main.scrollX -= deltaX / this.zoomFactor;
-            this.cameras.main.scrollY -= deltaY / this.zoomFactor;
+                // Calculer la nouvelle position de défilement
+                let newCamerasMainX = this.cameras.main.scrollX - deltaX / this.zoomFactor;
+                let newCamerasMainY = this.cameras.main.scrollY - deltaY / this.zoomFactor;
 
-            this.mouseStartX = this.input.x;
-            this.mouseStartY = this.input.y;
+                // Définir les limites de la carte
+                const limitLeft = -5100;
+                const limitRight = 5000;
+                const limitTop = -3000;
+                const limitBottom = 3000;
+
+                // Appliquer les limites
+                newCamerasMainX = Phaser.Math.Clamp(newCamerasMainX, limitLeft, limitRight);
+                newCamerasMainY = Phaser.Math.Clamp(newCamerasMainY, limitTop, limitBottom);
+
+                this.cameras.main.scrollX = newCamerasMainX;
+                this.cameras.main.scrollY = newCamerasMainY;
+
+                this.mouseStartX = this.input.x;
+                this.mouseStartY = this.input.y;
+            }
         }
     }
 }

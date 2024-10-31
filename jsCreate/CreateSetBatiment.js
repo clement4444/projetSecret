@@ -15,6 +15,9 @@ export function SetBatiment(scene) {
     // Ajouter l'événement de clic
     batimantFusion.setInteractive();
     batimantFusion.on('pointerdown', () => {
-        scene.createMenu(); // Appeler la fonction pour créer le menu
+        if (scene.menu === "home") {
+            scene.createMenu(); // Appeler la fonction pour créer le menu
+            scene.menu = "fusion";
+        }
     });
 }
