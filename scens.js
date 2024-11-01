@@ -11,6 +11,10 @@ import { MenuFusion } from "./menu/fusion/MenuFusion.js";
 import { MenuFusionCercle } from "./menu/fusion/MenuFusionCercle.js";
 import { MenuFusionListeMateriel } from "./menu/fusion/MenuFusionListeminerais.js";
 
+
+//importe les évenement
+import { EvenementMolletteSouris } from "./jsCreate/evenement/molletteSouris.js";
+
 export default class MainScene extends Phaser.Scene {
     constructor() {
         super({ key: 'MainScene' });
@@ -42,12 +46,6 @@ export default class MainScene extends Phaser.Scene {
         //afficher les ressource
         SetUICamera(this);
 
-        //a sup
-
-        // Détecter le défilement de la souris dans la zone de liste
-
-        //a sup
-
         this.input.on('pointerdown', (pointer) => {
             if (pointer.leftButtonDown()) {
                 this.isMouseDown = true;
@@ -60,29 +58,8 @@ export default class MainScene extends Phaser.Scene {
             this.isMouseDown = false;
         });
 
-        //paramètre de zoom
-        this.zoomFactor = 1;
-        this.maxZoom = 10;
-        this.minZoom = 0.1;
-
-        this.input.on('wheel', (pointer, gameObjects, deltaX, deltaY) => {
-            if (this.menu === "home") {
-                const cameraX = this.cameras.main.scrollX + pointer.x;
-                const cameraY = this.cameras.main.scrollY + pointer.y;
-
-                const centerX = this.cameras.main.scrollX + this.cameras.main.width / 2;
-                const centerY = this.cameras.main.scrollY + this.cameras.main.height / 2;
-
-                if (deltaY < 0) {
-                    this.zoomFactor += 0.1 * this.zoomFactor;
-                } else {
-                    this.zoomFactor -= 0.1 * this.zoomFactor;
-                }
-
-                this.zoomFactor = Phaser.Math.Clamp(this.zoomFactor, this.minZoom, this.maxZoom);
-                this.cameras.main.setZoom(this.zoomFactor);
-            }
-        });
+        //évenement de la souris
+        EvenementMolletteSouris(this);
     }
 
     createMenu() {
