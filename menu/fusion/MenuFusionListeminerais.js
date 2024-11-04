@@ -1,3 +1,5 @@
+import { CalculerMinerais } from "./caculerMinerais.js";
+
 export function MenuFusionListeMateriel(scene) {
     //les 6 catégorie de minerais------------------------------
     scene.listeMineraisType = ["rubis", "saphirs", "topazes", "emeraudes", "onyx", "diamants"];
@@ -37,9 +39,11 @@ export function MenuFusionListeMateriel(scene) {
     //le fond de la liste des minerais---------------------------------------------
     scene.fontListeMineraisFusion = scene.add.image(-5, window.innerHeight * 0.15, "fusionListeMinerais").setOrigin(0, 0).setInteractive();
     scene.fontListeMineraisFusion.displayWidth = window.innerWidth * 0.25;
-    scene.fontListeMineraisFusion.displayHeight = window.innerWidth * 0.35;
+    scene.fontListeMineraisFusion.displayHeight = window.innerHeight * 0.7;
     scene.menuFusionContainer.add(scene.fontListeMineraisFusion);
 
+    //liste des minerais de fusion possible
+    scene.ListeMineraisUtiliserCase = []
     //la liste dynamique des minerais
     setListeDynamique(scene);
 }
@@ -48,12 +52,12 @@ export function MenuFusionListeMateriel(scene) {
 function setListeDynamique(scene) {
     //liste dynamique ---------------------------------------------
     // Définir la zone de défilement pour la liste
-    scene.scrollAreaFusion = { x: 10, y: window.innerHeight * 0.167, width: window.innerWidth * 0.20, height: window.innerHeight * 0.671 };
+    scene.scrollAreaFusion = { x: 10, y: window.innerHeight * 0.167, width: window.innerWidth * 0.234, height: window.innerHeight * 0.671 };
     // Créer le conteneur pour les images
     scene.listMineraisContainerFusion = scene.add.container(scene.scrollAreaFusion.x, scene.scrollAreaFusion.y);
 
     const visibleItems = 4;
-    scene.itemHeightListeMineraisFusion = 100;
+    scene.itemHeightListeMineraisFusion = window.innerHeight * 0.175;
     scene.scrollLimitFusion = (10 - visibleItems) * scene.itemHeightListeMineraisFusion;
     scene.scrollPositionFusion = 0;
     //set les clé de minerais
@@ -61,14 +65,14 @@ function setListeDynamique(scene) {
     // Ajouter les images dans le conteneur
     for (let i = 0; i < scene.clesPurification.length; i++) {
         //les case du minerais
-        caseMinerais(scene, i)
+        caseMinerais(scene, i, "rubis")
 
         //les minerais
         //cle défférent a chaque tour
         const cle = scene.clesPurification[i];
-        const image = scene.add.image(0, i * scene.itemHeightListeMineraisFusion, scene.dataMinerais.rubis[cle].image).setOrigin(0, 0);
-        image.displayWidth = 100;
-        image.displayHeight = 100;
+        const image = scene.add.image((window.innerWidth * 0.027), (i * scene.itemHeightListeMineraisFusion + window.innerHeight * 0.032), scene.dataMinerais.rubis[cle].image).setOrigin(0, 0);
+        image.displayWidth = window.innerWidth * 0.026;
+        image.displayHeight = window.innerHeight * 0.065;
         scene.listMineraisContainerFusion.add(image);
     }
     // Créer une zone masquée pour la liste visible
@@ -90,23 +94,62 @@ function actualiserListeDynamique(scene) {
             // Ajouter les images dans le conteneur
             for (let y = 0; y < scene.clesPurification.length; y++) {
                 //les case du minerais
-                caseMinerais(scene, y)
+                caseMinerais(scene, y, scene.listeMineraisType[i])
                 //cle défférent a chaque tour
                 const cle = scene.clesPurification[y];
-                const image = scene.add.image(0, y * scene.itemHeightListeMineraisFusion, scene.dataMinerais[scene.listeMineraisType[i]][cle].image).setOrigin(0, 0);
-                image.displayWidth = 100;
-                image.displayHeight = 100;
+                const image = scene.add.image((window.innerWidth * 0.027), (y * scene.itemHeightListeMineraisFusion + window.innerHeight * 0.032), scene.dataMinerais[scene.listeMineraisType[i]][cle].image).setOrigin(0, 0);
+                image.displayWidth = window.innerWidth * 0.026;
+                image.displayHeight = window.innerHeight * 0.065;
                 scene.listMineraisContainerFusion.add(image);
-                console.log("ok");
             }
         }
     }
+    //remonter le scroll de la liste en haut
+    scene.scrollPositionFusion = Phaser.Math.Clamp(0, 0, scene.scrollLimitFusion);
+    scene.listMineraisContainerFusion.y = scene.scrollAreaFusion.y - scene.scrollPositionFusion;
 }
 
-function caseMinerais(scene, i) {
+function caseMinerais(scene, i, cleMinerais) {
     //la case du minerais
-    const caseMinerais = scene.add.image(0, i * scene.itemHeightListeMineraisFusion, "fusionSectionMinerais").setOrigin(0, 0);
-    caseMinerais.displayWidth = window.innerWidth * 0.2;
-    caseMinerais.displayHeight = window.innerHeight * 0.2;
+    const caseMinerais = scene.add.image(window.innerWidth * 0.015, i * scene.itemHeightListeMineraisFusion, CalculerMinerais(scene, i, cleMinerais) ? "fusionsectionMineraisValider" : "fusionSectionMinerais").setOrigin(0, 0);
+    caseMinerais.displayWidth = window.innerWidth * 0.21;
+    caseMinerais.displayHeight = window.innerHeight * 0.12;
     scene.listMineraisContainerFusion.add(caseMinerais);
+
+    //texte TYPE
+    const typeText = scene.add.text(
+        window.innerWidth * 0.07,
+        i * scene.itemHeightListeMineraisFusion + window.innerHeight * 0.013,
+        `${scene.dataMinerais[cleMinerais][scene.clesPurification[i]].type}`,
+        {
+            fontSize: `${window.innerHeight * 0.03}px`,
+            fill: '#663807',
+            fontFamily: 'Arial',
+            fontStyle: 'bold'
+        });
+    scene.listMineraisContainerFusion.add(typeText);
+    //texte purifaication
+    const purifaicationText = scene.add.text(
+        window.innerWidth * 0.158,
+        i * scene.itemHeightListeMineraisFusion + window.innerHeight * 0.013,
+        `${scene.dataMinerais[cleMinerais][scene.clesPurification[i]].nom}`,
+        {
+            fontSize: `${window.innerHeight * 0.03}px`,
+            fill: '#663807',
+            fontFamily: 'Arial',
+            fontStyle: 'bold'
+        });
+    scene.listMineraisContainerFusion.add(purifaicationText);
+    //texte quantiter
+    const quantiterText = scene.add.text(
+        window.innerWidth * 0.072,
+        i * scene.itemHeightListeMineraisFusion + window.innerHeight * 0.058,
+        `X${scene.dataMinerais[cleMinerais][scene.clesPurification[i]].quantiter}`,
+        {
+            fontSize: `${window.innerHeight * 0.04}px`,
+            fill: '#1bba05',
+            fontFamily: 'Arial',
+            fontStyle: 'bold'
+        });
+    scene.listMineraisContainerFusion.add(quantiterText);
 }

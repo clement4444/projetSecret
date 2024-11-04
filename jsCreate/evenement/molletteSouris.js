@@ -24,7 +24,7 @@ export function EvenementMolletteSouris(scene) {
             // Vérifier si la souris est dans la zone de défilement
             if (pointer.x >= scene.scrollAreaFusion.x && pointer.x <= scene.scrollAreaFusion.x + scene.scrollAreaFusion.width && pointer.y >= scene.scrollAreaFusion.y && pointer.y <= scene.scrollAreaFusion.y + scene.scrollAreaFusion.height) {
                 // Ajuster la position de défilement en fonction de la molette
-                scene.scrollPositionFusion += deltaY * 0.2;
+                scene.scrollPositionFusion += deltaY * 0.4;
                 scene.scrollPositionFusion = Phaser.Math.Clamp(scene.scrollPositionFusion, 0, scene.scrollLimitFusion);
                 scene.listMineraisContainerFusion.y = scene.scrollAreaFusion.y - scene.scrollPositionFusion;
             }

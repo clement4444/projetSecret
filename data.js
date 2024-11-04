@@ -3,8 +3,8 @@ export function Data(scene) {
     scene.dataMinerais = {
         rubis: {
             presentation: "rubis",
-            brut: { quantiter: 0, image: "rubisBrut", nom: "brut", type: "rubis" },
-            soigne: { quantiter: 0, image: "rubisSoigne", nom: "soigné", type: "rubis" },
+            brut: { quantiter: 100, image: "rubisBrut", nom: "brut", type: "rubis" },
+            soigne: { quantiter: 5, image: "rubisSoigne", nom: "soigné", type: "rubis" },
             pur: { quantiter: 0, image: "rubisPur", nom: "pur", type: "rubis" },
             raffine: { quantiter: 0, image: "rubisRaffine", nom: "raffiné", type: "rubis" },
             elegant: { quantiter: 0, image: "rubisElegant", nom: "élégant", type: "rubis" },
